@@ -11,16 +11,21 @@
   const container = document.getElementById('paragraphs');
   if (!container) return;
 
-  // CSS order is stable even if another script adds/re-adds a card later.
   container.style.display = 'flex';
   container.style.flexDirection = 'column';
 
   function applyOrder() {
     container.querySelectorAll('.paragraph').forEach(card => {
-      card.style.order = String(firstNumber(card.id));
+      // Chapter summary has no paragraph number, so it must always be last.
+      if (card.id === 'chapter-1-summary' || card.classList.contains('chapter-summary')) {
+        card.style.order = '9999';
+      } else {
+        card.style.order = String(firstNumber(card.id));
+      }
     });
   }
 
   applyOrder();
-  new MutationObserver(applyOrder).observe(container, { childList: true });
+  new MutationObserver(applyOrder).observe(container, { childList: true, subtree: false });
+  window.addEventListener('load', applyOrder);
 })();
