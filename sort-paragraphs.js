@@ -1,31 +1,26 @@
-// Keep paragraph cards in textbook order even when paragraph files render themselves.
+// Force paragraph cards into textbook order, including cards added outside paragraphData.
 (function () {
   function firstNumber(value) {
     return parseInt(String(value).match(/\d+/)?.[0] || '0', 10);
   }
 
-  function sortData() {
-    if (typeof paragraphData !== 'undefined') {
-      paragraphData.sort((a, b) => firstNumber(a.number) - firstNumber(b.number));
-    }
+  if (typeof paragraphData !== 'undefined') {
+    paragraphData.sort((a, b) => firstNumber(a.number) - firstNumber(b.number));
   }
 
-  function sortRenderedCards() {
-    const container = document.getElementById('paragraphs');
-    if (!container) return;
-    const cards = Array.from(container.querySelectorAll('.paragraph'));
-    cards.sort((a, b) => firstNumber(a.id) - firstNumber(b.id));
-    cards.forEach(card => container.appendChild(card));
+  const container = document.getElementById('paragraphs');
+  if (!container) return;
+
+  // CSS order is stable even if another script adds/re-adds a card later.
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+
+  function applyOrder() {
+    container.querySelectorAll('.paragraph').forEach(card => {
+      card.style.order = String(firstNumber(card.id));
+    });
   }
 
-  sortData();
-  if (typeof render === 'function') render();
-  sortRenderedCards();
-
-  // Some paragraph files call render() themselves. Re-check after all current scripts finish.
-  setTimeout(() => {
-    sortData();
-    if (typeof render === 'function') render();
-    sortRenderedCards();
-  }, 0);
+  applyOrder();
+  new MutationObserver(applyOrder).observe(container, { childList: true });
 })();
