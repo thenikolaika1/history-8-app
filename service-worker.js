@@ -1,8 +1,5 @@
-// History PWA: always use the newest online version.
-// We deliberately do not cache app shell files here: GitHub Pages + browser HTTP cache
-// handle delivery, while refresh must always be able to receive the latest deployment.
+// History PWA: network-first and bypass stale Safari caches.
 self.addEventListener('install',()=>self.skipWaiting());
-
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
@@ -10,7 +7,7 @@ self.addEventListener('activate',event=>{
     await self.clients.claim();
   })());
 });
-
-self.addEventListener('fetch',()=>{
-  // No respondWith: requests go straight to the network/browser normally.
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET')return;
+  event.respondWith(fetch(event.request,{cache:'no-store'}).catch(()=>caches.match(event.request)));
 });
