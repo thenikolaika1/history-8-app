@@ -18,9 +18,9 @@
     container.querySelectorAll('.paragraph').forEach(card => {
       // Chapter summary has no paragraph number, so it must always be last.
       if (card.id === 'chapter-1-summary' || card.classList.contains('chapter-summary')) {
-        card.style.order = '9999';
+        card.style.order = '135';
       } else {
-        card.style.order = String(firstNumber(card.id));
+        card.style.order = String(firstNumber(card.id) * 10);
       }
     });
   }
